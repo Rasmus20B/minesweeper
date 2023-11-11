@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include <cstdint>
+#include <queue>
 #include <random>
 #include <utility>
 
@@ -87,7 +88,7 @@ bool validate_mine(const auto& board, uint8_t x, uint8_t y) {
     auto cx = x + dirs[i][0];
     auto cy = y + dirs[i][1];
     if (within_board(cx, cy)) {
-      if (board[cx][cy].val + 1 > config.validEmptyCells && board[cx][cy].val != 254) return false;
+      if ((board[cx][cy].val + 1 > config.validEmptyCells && board[cx][cy].val != 254) || board[cx][cy].val == 253) return false;
     }
   }
   return true;
@@ -97,8 +98,7 @@ void generate_board(auto& board, Tile start) {
   uint8_t mines_placed = 0;
   while (mines_placed <= config.n_mines) {
     auto [x, y] = getRandCoord(config.rows , config.cols );
-    if(board[x][y].val == 254) continue;
-
+    if(board[x][y].val == 254 || board[x][y].val == 253) continue;
     if(validate_mine(board, x, y)) {
       board[x][y].val = 254;
       board[x][y].state = TileState::STATE_INVISIBLE;
@@ -106,7 +106,7 @@ void generate_board(auto& board, Tile start) {
       for(int i = 0; i < 8; ++i) {
         auto cx = x + dirs[i][0];
         auto cy = y + dirs[i][1];
-        if (within_board(cx, cy) && board[cx][cy].val != 254) {
+        if (within_board(cx, cy) && board[cx][cy].val != 254 && board[cx][cy].val != 253) {
           board[cx][cy].val++;
         }
       }
@@ -174,6 +174,32 @@ void draw_board(auto &board, double timer, GameState state, uint16_t count) {
   EndDrawing();
 }
 
+uint16_t bfs_click_zeroes(auto &board, uint16_t start_x, uint16_t start_y) {
+  std::queue<std::pair<uint16_t, uint16_t>> q;
+  uint16_t total = 0;
+  q.push({start_x, start_y});
+  while(!q.empty()) {
+    auto [x, y] = q.front();
+    q.pop();
+    for(int i = 0; i < dirs.size(); ++i) {
+      auto cx = x + dirs[i][0];
+      auto cy = y + dirs[i][1];
+
+      if(within_board(cx, cy)) {
+        if(board[cx][cy].state != TileState::STATE_CLICKED && board[cx][cy].val == 0) {
+          board[cx][cy].state = TileState::STATE_CLICKED;
+          total++;
+          q.push({cx, cy});
+        } else if(board[cx][cy].val <= config.validEmptyCells && board[cx][cy].state != TileState::STATE_CLICKED) {
+          board[cx][cy].state = TileState::STATE_CLICKED;
+          total++;
+        }
+      }
+    }
+  }
+  return total;
+}
+
 void game_loop() {
   std::vector<std::vector<Tile>> board;
   board.resize(config.rows);
@@ -214,13 +240,20 @@ void game_loop() {
             state = GameState::GAME_LOSS;
             start_time = 0;
           } else if (board[x][y].state != TileState::STATE_CLICKED) {
+
+            // A click on a tile occured. We will then BFS all 0 TileState
+            // and set them to Clicked as well.
             if(board[x][y].state != TileState::STATE_FLAGGED){
               clicked++;
             }
             board[x][y].state = TileState::STATE_CLICKED;
+            if(board[x][y].val == 0) {
+              clicked += bfs_click_zeroes(board, x, y);
+            }
           }
         } else {
           // Generate a new board based on the player's first click
+          board[x][y].val = 253;
           generate_board(board, Tile {
               .x = x,
               .y = y,
@@ -234,6 +267,9 @@ void game_loop() {
           start_time = GetTime();
           cur_time = 0;
           clicked = 1;
+          if(board[x][y].val == 0) {
+            clicked += bfs_click_zeroes(board, x, y);
+          }
         }
       } else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && state == GameState::GAME_PROGRESS) {
         if (board[x][y].state != TileState::STATE_FLAGGED) {
