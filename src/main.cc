@@ -143,7 +143,33 @@ void draw_board(auto &board, double timer, GameState state, uint16_t count) {
               {.x = 30, .y = 30},
               LIGHTGRAY
               );
-          DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, WHITE);
+
+          switch(board[i][j].val) {
+            case 0:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, WHITE);
+              break;
+            case 1:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, BLUE);
+              break;
+            case 2:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, GREEN);
+              break;
+            case 3:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, RED);
+              break;
+            case 4:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, PURPLE);
+              break;
+            case 5:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, PINK);
+              break;
+            case 6:
+              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, ORANGE);
+              break;
+
+          }
+          if(board[i][j].val > 0) {
+          }
           break;
         case TileState::STATE_FLAGGED:
           DrawRectangleV(
@@ -287,10 +313,10 @@ void game_loop() {
 }
 
 int main() {
-  config.rows = 10;
-  config.cols = 8;
-  config.validEmptyCells = 5;
-  config.n_mines = 10;
+  config.rows = 36;
+  config.cols = 20;
+  config.validEmptyCells = 6;
+  config.n_mines = 100;
   InitWindow(config.rows * 40, config.cols * 40 + 80, "minesweeper");
   game_loop();
 }
