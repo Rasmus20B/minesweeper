@@ -1,5 +1,6 @@
 #include "minesweeper.h"
 
+#include <array>
 #include <chrono>
 #include <iostream>
 #include <cstdint>
