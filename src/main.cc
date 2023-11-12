@@ -145,9 +145,6 @@ void draw_board(auto &board, double timer, GameState state, uint16_t count) {
               );
 
           switch(board[i][j].val) {
-            case 0:
-              DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, WHITE);
-              break;
             case 1:
               DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, BLUE);
               break;
@@ -167,8 +164,6 @@ void draw_board(auto &board, double timer, GameState state, uint16_t count) {
               DrawText(std::to_string(board[i][j].val).c_str(), 40 * i, 40 * j, 22, ORANGE);
               break;
 
-          }
-          if(board[i][j].val > 0) {
           }
           break;
         case TileState::STATE_FLAGGED:
