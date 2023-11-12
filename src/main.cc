@@ -114,7 +114,6 @@ void generate_board(auto& board, Tile start) {
         }
       }
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(30));
   }
 
   board[start.x][start.y].val = 0;
