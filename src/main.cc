@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <queue>
 #include <random>
+#include <thread>
 #include <utility>
 
 #include <raylib.h>
@@ -53,8 +54,9 @@ static constexpr std::array<std::array<int8_t, 2>, 8> dirs = {{
 
 inline uint32_t getRand(const uint32_t s, const uint32_t e) {
   std::uniform_int_distribution<int>  Distribution(s, e);
-  std::default_random_engine Generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-  return Distribution(Generator);
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  return Distribution(mt);
 }
 
 inline std::pair<uint16_t, uint16_t> getRandCoord(const uint32_t rows, const uint32_t cols) {
@@ -80,16 +82,16 @@ bool validate_board(const auto board, Tile start) {
   return true;
 }
 
-bool within_board(const uint8_t x, const uint8_t y) {
+bool within_board(const uint16_t x, const uint16_t y) {
   return (x >= 0 && x >= 0 && x < config.rows  && y < config.cols );
 }
 
-bool validate_mine(const auto& board, uint8_t x, uint8_t y) {
+bool validate_mine(const auto& board, const uint16_t x, const uint16_t y) {
   for(int i = 0; i < 8; ++i) {
     auto cx = x + dirs[i][0];
     auto cy = y + dirs[i][1];
     if (within_board(cx, cy)) {
-      if ((board[cx][cy].val + 1 > config.validEmptyCells && board[cx][cy].val != 254) || board[cx][cy].val == 253) return false;
+      if (board[cx][cy].val + 1 > config.validEmptyCells && (board[cx][cy].val != 254 || board[cx][cy].val == 253)) return false;
     }
   }
   return true;
@@ -97,7 +99,7 @@ bool validate_mine(const auto& board, uint8_t x, uint8_t y) {
 
 void generate_board(auto& board, Tile start) {
   uint8_t mines_placed = 0;
-  while (mines_placed <= config.n_mines) {
+  while ((mines_placed) <= config.n_mines) {
     auto [x, y] = getRandCoord(config.rows , config.cols );
     if(board[x][y].val == 254 || board[x][y].val == 253) continue;
     if(validate_mine(board, x, y)) {
@@ -112,6 +114,7 @@ void generate_board(auto& board, Tile start) {
         }
       }
     }
+    std::this_thread::sleep_for(std::chrono::microseconds(30));
   }
 
   board[start.x][start.y].val = 0;
@@ -309,10 +312,10 @@ void game_loop() {
 }
 
 int main() {
-  config.rows = 36;
-  config.cols = 20;
-  config.validEmptyCells = 6;
-  config.n_mines = 100;
+  config.rows = 8;
+  config.cols = 8;
+  config.validEmptyCells = 3;
+  config.n_mines = 10;
   InitWindow(config.rows * 40, config.cols * 40 + 80, "minesweeper");
   game_loop();
 }
