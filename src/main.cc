@@ -41,6 +41,8 @@ struct Config {
 
 static inline Config config;
 
+using Board = std::vector<std::vector<Tile>>;
+
 static constexpr std::array<std::array<int8_t, 2>, 8> dirs = {{
   {0, 1}, // mid - down
   {0, -1}, // mid - up
@@ -69,6 +71,7 @@ bool validate_board(const auto board, Tile start) {
   auto y = start.y;
 
   auto board_checked = board;
+  // Zero out board except starting coord
   for(auto &i : board_checked) {
     for(auto j : i) {
       if(j.val < 253) j.val = 0;
@@ -226,7 +229,7 @@ uint16_t bfs_click_zeroes(auto &board, uint16_t start_x, uint16_t start_y) {
 }
 
 void game_loop() {
-  std::vector<std::vector<Tile>> board;
+  Board board;
   board.resize(config.rows);
   double start_time = 0;
   double cur_time = 0;
@@ -312,10 +315,10 @@ void game_loop() {
 }
 
 int main() {
-  config.rows = 8;
-  config.cols = 8;
-  config.validEmptyCells = 3;
-  config.n_mines = 10;
+  config.rows = 36;
+  config.cols = 20;
+  config.validEmptyCells = 6;
+  config.n_mines = 100;
   InitWindow(config.rows * 40, config.cols * 40 + 80, "minesweeper");
   game_loop();
 }
