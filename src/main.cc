@@ -319,17 +319,10 @@ void game_loop() {
 }
 
 int main() {
-<<<<<<< HEAD
-  config.rows = 36;
-  config.cols = 20;
-  config.validEmptyCells = 6;
-  config.n_mines = 100;
-=======
   config.rows = 16;
   config.cols = 10;
   config.validEmptyCells = 5;
   config.n_mines = 30;
->>>>>>> b18efa4 (added install instruction to src/CMakeLists.txt)
   InitWindow(config.rows * 40, config.cols * 40 + 80, "minesweeper");
   std::cout << "sizeof: " << sizeof(Tile) << "\n";
   game_loop();
