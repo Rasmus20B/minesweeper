@@ -25,7 +25,7 @@ enum class GameState : uint8_t {
   GAME_LOSS = 3,
 };
 
-struct alignas(2) Tile {
+struct Tile {
   uint16_t x;
   uint16_t y;
   TileState state;
@@ -78,9 +78,14 @@ bool validate_board(const auto board, Tile start) {
     }
   }
 
-  for(int i = 0; i < 8; ++i) {
-    auto cx = x + dirs[i][0];
-    auto cy = y + dirs[i][1];
+  std::vector<uint8_t> adjescent;
+  while(true) {
+    for(int i = 0; i < 8; ++i) {
+      auto cx = x + dirs[i][0];
+      auto cy = y + dirs[i][1];
+    }
+
+    break;
   }
   return true;
 }
@@ -243,11 +248,11 @@ void game_loop() {
     if(GetKeyPressed() == KEY_R) {
       // Restart the game (clear the board)
       for(auto &i : board) {
-        std::fill(i.begin(), i.end(), Tile {
+        std::fill(i.begin(), i.end(), std::move(Tile {
             .x = 0,
             .y = 0,
             .val = 0
-            });
+            }));
       }
       state = GameState::GAME_UNINIT;
       start_time = 0;
@@ -314,10 +319,18 @@ void game_loop() {
 }
 
 int main() {
+<<<<<<< HEAD
   config.rows = 36;
   config.cols = 20;
   config.validEmptyCells = 6;
   config.n_mines = 100;
+=======
+  config.rows = 16;
+  config.cols = 10;
+  config.validEmptyCells = 5;
+  config.n_mines = 30;
+>>>>>>> b18efa4 (added install instruction to src/CMakeLists.txt)
   InitWindow(config.rows * 40, config.cols * 40 + 80, "minesweeper");
+  std::cout << "sizeof: " << sizeof(Tile) << "\n";
   game_loop();
 }

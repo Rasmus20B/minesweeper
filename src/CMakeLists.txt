@@ -3,3 +3,5 @@ add_executable(${PROJECT_NAME}
   minesweeper.cc
   minesweeper.h
 )
+
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
